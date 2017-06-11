@@ -1,5 +1,6 @@
 # GameMediaBot: git ignores
 src/settings.py
+SmiteGame_classified_data (1).json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

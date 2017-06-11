@@ -1,5 +1,4 @@
-from src.utility.load_data import load
-from src.utility.manual_classification import ManualClassification
+from src.data_scripts.manual_classification import ManualClassification
 # import numpy as np
 # X = np.random.randint(5, size=(6, 100))
 # y = np.array([1, 2, 3, 4, 5, 6])
@@ -11,4 +10,4 @@ from src.utility.manual_classification import ManualClassification
 
 if __name__ == "__main__":
     # load()
-    ManualClassification()
+    ManualClassification(twitter_screen_name="SmiteGame", search_keywords=["FWOTD"])
