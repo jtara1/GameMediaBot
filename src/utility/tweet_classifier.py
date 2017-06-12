@@ -12,7 +12,6 @@ class TweetClassifier:
         self.data_file_name = data_file_name  # file containing a list of dictionaries with 'text' and 'category' keys
 
         self._load_and_fit()
-        self.print_metrics()
 
     def _load_and_fit(self):
         # takes raw data, applies transforms on it, then puts the transformed data through the estimator / classifier
