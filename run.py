@@ -1,13 +1,7 @@
+from src.utility.load_data import TweetClassifier
 from src.data_scripts.manual_classification import ManualClassification
-# import numpy as np
-# X = np.random.randint(5, size=(6, 100))
-# y = np.array([1, 2, 3, 4, 5, 6])
-# from sklearn.naive_bayes import MultinomialNB
-# clf = MultinomialNB()
-# clf.fit(X, y)
-#
-# print(clf.predict(X[2:3]))
+
 
 if __name__ == "__main__":
-    # load()
-    ManualClassification(twitter_screen_name="SmiteGame", search_keywords=["FWOTD"])
+    cls = TweetClassifier()
+    # ManualClassification(twitter_screen_name="SmiteGame", search_keywords=["FWOTD"])
