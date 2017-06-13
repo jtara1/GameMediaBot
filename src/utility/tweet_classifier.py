@@ -14,7 +14,7 @@ class TweetClassifier:
         self._load_and_fit()
 
     def _load_and_fit(self):
-        # takes raw data, applies transforms on it, then puts the transformed data through the estimator / classifier
+        # takes raw data, applies transforms on it, then trains the estimator / classifier with the data
         self.clf = Pipeline([('vect', CountVectorizer()),
                              ('tfidf', TfidfTransformer()),
                              ('clf', SGDClassifier(loss='hinge', penalty='l2',

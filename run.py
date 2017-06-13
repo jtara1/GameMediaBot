@@ -10,5 +10,5 @@ if __name__ == "__main__":
     awaiter = AwaitNewTweet(classifier=clf,
                             trigger_targets=['fwotd', 'bonus_points'],
                             twitter_screen_name="SmiteGame",
-                            data_file="SmiteGame_classified_data.json")
+                            last_id_file="last_ids.json")
     awaiter.await()  # blocks, waiting for new tweet, classifies/predicts it, retweets if it's in trigger_targets

@@ -35,7 +35,7 @@ class TestAwaitTweet:
         awaiter = AwaitNewTweet(classifier=clf,
                                 trigger_targets=['fwotd', 'bonus_points'],
                                 twitter_screen_name=my_twitter_screen_name,
-                                data_file="SmiteGame_classified_data.json")
+                                last_id_file="SmiteGame_classified_data.json")
         thread = threading.Thread(target=awaiter.await, name="awaiter")
 
         # create new tweet
@@ -45,7 +45,7 @@ class TestAwaitTweet:
 
         log.debug("waiting before we check user timeline most recent tweet")
         print()
-        time.sleep(15)  # TODO: make the amount of time between polling for new tweets an attribute
+        time.sleep(awaiter.poll_rate + 1)
         print("checking ...")
         recheck_statuses = api.GetHomeTimeline(count=1)
         print(recheck_statuses[0].retweeted)
