@@ -33,6 +33,6 @@ class AwaitNewTweet:
         for s in statuses:
             # if classification of tweet text is in trigger_targets
             if self.clf.classify(s.text)[0] in self.trigger_targets:
-                print("Retweeting: " + s.text[:10] + " ...")
+                print("Retweeting: " + s.text[:40] + " ...")
                 self.api.PostRetweet(s.id)  # retweet this tweet
                 self.most_recent_tweet_id = s.id
