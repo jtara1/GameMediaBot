@@ -1,7 +1,6 @@
-from src.utility.tweet_classifier import TweetClassifier
-from src.data_scripts.manual_classification import ManualClassification
-from src.utility.await_new_tweet import AwaitNewTweet
+from GameMediaBot.tweet_classifier import TweetClassifier
 
+from GameMediaBot.await_new_tweet import AwaitNewTweet
 
 if __name__ == "__main__":
     # ManualClassification(twitter_screen_name="SmiteGame", search_keywords=["FWOTD"])

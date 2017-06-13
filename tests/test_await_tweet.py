@@ -1,11 +1,10 @@
-import pytest
-from src.utility.await_new_tweet import AwaitNewTweet
-from src.utility.tweet_classifier import TweetClassifier
-from src.settings import *
-import twitter
-import time
-import threading
 import logging
+import threading
+import time
+import twitter
+from GameMediaBot.tweet_classifier import TweetClassifier
+from GameMediaBot.await_new_tweet import AwaitNewTweet
+from GameMediaBot.settings import *
 
 
 class TestAwaitTweet:
@@ -35,21 +34,23 @@ class TestAwaitTweet:
         awaiter = AwaitNewTweet(classifier=clf,
                                 trigger_targets=['fwotd', 'bonus_points'],
                                 twitter_screen_name=my_twitter_screen_name,
-                                last_id_file="SmiteGame_classified_data.json")
+                                last_id_file="last_ids.json")
         thread = threading.Thread(target=awaiter.await, name="awaiter")
 
         # create new tweet
         doc1 = "Earn 3 Fantasy Point Boosters for completing 1 First Win of the Day!\n\
                 http://www.smitegame.com/team-booster-weekend-june-9-11 ..."
+        doc2 = "Junk tweet for test case, please ignore, this should be deleted shortly..."
         new_tweet_status = api.PostUpdate(status=doc1)
+        api.PostUpdate(status=doc2)
 
         log.debug("waiting before we check user timeline most recent tweet")
-        print()
         time.sleep(awaiter.poll_rate + 1)
-        print("checking ...")
-        recheck_statuses = api.GetHomeTimeline(count=1)
-        print(recheck_statuses[0].retweeted)
-        print(recheck_statuses[0].AsDict())
+        print("checking statuses/tweets ...")
+        recheck_statuses = api.GetHomeTimeline(count=2)
+        print(recheck_statuses[1].retweeted)
+        print(recheck_statuses[1].AsDict())
 
-        assert(new_tweet_status.id == recheck_statuses[0].id)
+        assert(new_tweet_status.id == recheck_statuses[1].id)
+        api.DestroyStatus(status_id=recheck_statuses[1].id)
         api.DestroyStatus(status_id=recheck_statuses[0].id)

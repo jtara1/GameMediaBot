@@ -1,2 +1,4 @@
 python-twitter==3.3
 sklearn
+colorama
+keyboard
