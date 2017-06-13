@@ -16,9 +16,7 @@ class AwaitNewTweet:
         self.clf = classifier
         self.trigger_targets = trigger_targets
 
-        self._await()
-
-    def _await(self):
+    def await(self):
         async def wait_for_new_tweet():
             while True:
                 statuses = self.api.GetUserTimeline(
