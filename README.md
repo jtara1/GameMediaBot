@@ -20,7 +20,7 @@ Program tested on Linux with Python 3.5
 
 ```
 git clone https://github.com/jtara1/GameMediaBot
-sudo pip3.5 install -r requirements 
+sudo pip3.5 install -r requirements.txt
 ```
 
 - You'll also need to go to [apps twitter site](https://apps.twitter.com/) to create an app to get the four things
@@ -38,9 +38,9 @@ __or__
 
 You can train your own set of tweets from a certain twitter account by running
 ```
-sudo python3 ./GameMediaBot/data_scripts/manual_classification.py 
+sudo python3 manual_classification.py 
 ```
-_Note:_ sudo is needed the `keyboard` library when running on Linux.
+_Note:_ sudo is needed by the `keyboard` library when running on Linux.
 
 Then you'd need to update the code in `run.py` to 
 

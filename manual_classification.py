@@ -10,7 +10,7 @@ colorama.init()
 
 
 class ManualClassification:
-    def __init__(self, twitter_screen_name="SmiteGame", search_keywords=()):
+    def __init__(self, twitter_screen_name, categories):
         """
         
         Args:
@@ -23,10 +23,11 @@ class ManualClassification:
         self.last_id = None
         self.tweets = []
         self.statuses = None
+        self.categories = categories
 
         # begin
         self._load_last_id()
-        self._get_statuses(search_keywords)
+        self._get_statuses()
         self._iterate_over_statuses()
 
     def _load_last_id(self):
@@ -39,22 +40,18 @@ class ManualClassification:
         today = datetime.datetime.utcnow()
         return "{0}-{1}-{2}".format(today.year, today.month, today.day)
 
-    def _get_statuses(self, keywords):
+    def _get_statuses(self):
         """ 
-        Script requires su privilege if running on Linux because of the keyboard library
-        e.g.: $ sudo manual_classification.py
+        Script requires root privilege if running on Linux because of the keyboard library
+        Examples: $ sudo manual_classification.py
         Returns:
-            None. Output can be a .json file containing data of tweets with classification when user commands it
+            None. Output can be a .json file containing data of tweets with 
+            classification when user commands it
         """
         api = twitter.Api(consumer_key=consumer_key,
                           consumer_secret=consumer_secret,
                           access_token_key=access_token_key,
                           access_token_secret=access_token_secret)
-
-        # build twitter search query
-        raw_query = "q=from%3A{acc}".format(acc=self.twitter_screen_name)
-        for w in keywords:
-            raw_query += "+{word}".format(word=w)
 
         self.statuses = api.GetUserTimeline(screen_name=self.twitter_screen_name,
                                             count=40,
@@ -71,8 +68,14 @@ class ManualClassification:
                 json.dump(self.tweets, f)
             print("\nSave completed, safe to exit")
 
-        keyboard.add_hotkey(hotkey='1', callback=classify_as, args=([["fwotd"]]))
-        keyboard.add_hotkey(hotkey='2', callback=classify_as, args=([["bonus_points"]]))
+        if len(self.categories) > 9:
+            raise ValueError("Auto hotkey assignment might screw up")
+
+        ui_str = ""
+        for count, category in zip(range(len(self.categories)), self.categories):
+            keyboard.add_hotkey(hotkey=str(count+1), callback=classify_as, args=([[category]]))
+            ui_str += "[{count}] {category}\n".format(count=count+1, category=category)
+        ui_str += "[Enter] Continue\n[Ctrl+c] Save PREVIOUS & Exit"
 
         # O(n^n) (worse because it'll block, waiting for user input)
         for s in self.statuses:
@@ -90,10 +93,7 @@ class ManualClassification:
 
             self.classification = ["dont_care"]
             print(colorama.Fore.RED + s.text + colorama.Style.RESET_ALL)
-            print("[1] First win of the day event\n"
-                  "[2] Bonus points (exp, gold, etc.) event\n"
-                  "[Enter] Continue\n"
-                  "[Ctrl+c] Save PREVIOUS & Exit")
+            print(ui_str)
 
             try:
                 keyboard.wait('enter')
@@ -108,3 +108,7 @@ class ManualClassification:
 
         self.tweets.sort(key=lambda d: d['id'], reverse=True)  # sort tweets from newest to oldest
         save()
+
+
+if __name__ == "__main__":
+    ManualClassification(twitter_screen_name="SmiteGame", categories=["fwotd", "bonus_points"])
