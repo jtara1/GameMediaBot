@@ -2,8 +2,11 @@ import asyncio
 import twitter
 import json
 import logging
+import os
+import colorama
 from GameMediaBot.settings import *
 from GameMediaBot.utility.general import get_first_x_words
+colorama.init()
 
 
 class AwaitNewTweet:
@@ -36,8 +39,13 @@ class AwaitNewTweet:
                                access_token_secret=access_token_secret)
         self.twitter_screen_name = twitter_screen_name.lower()
         self.last_ids_file = last_id_file
+        # create if not yet created
+        if not os.path.isfile(last_id_file):
+            with open(last_id_file, 'w') as f:
+                f.write('{}')
         self.last_ids = json.load(open(last_id_file, 'r'))
 
+        # no record of last id for this twitter user
         if self.twitter_screen_name not in self.last_ids:
             self._define_new_most_recent_tweet()
         else:
@@ -86,16 +94,17 @@ class AwaitNewTweet:
                 statuses (list of twitter.model.Status):
                     Iterate through these, classifying each
         """
-        for s in statuses:
+        # iterate from oldest to newest (tweet) statuses
+        for s in sorted(statuses, key=lambda status: status.id):
             # if classification of tweet text is in trigger_targets
             if self.clf.classify(s.text)[0] in self.trigger_targets:
                 status_str = "Retweeting: " + get_first_x_words(s.text, 10) + " ..."
-                print(status_str)
+                print(colorama.Fore.GREEN + status_str + colorama.Style.RESET_ALL)
                 self.log.debug(status_str)  # store in log
                 self.api.PostRetweet(s.id)  # retweet this tweet
             else:
                 status_str = "Not retweeting: id={}, {} ...".format(s.id, get_first_x_words(s.text, 10))
-                print(status_str)
+                print(colorama.Fore.RED + status_str + colorama.Style.RESET_ALL)
                 self.log.debug(status_str)
 
         # update dict and json file with most recent twitter id processed
