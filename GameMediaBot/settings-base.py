@@ -3,7 +3,7 @@
 
 consumer_key = ""
 consumer_secret = ""
-access_token = ""
-access_secret = ""
+access_token_key = ""
+access_token_secret = ""
 
 my_twitter_screen_name = ""
