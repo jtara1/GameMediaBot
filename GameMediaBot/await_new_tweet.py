@@ -48,6 +48,12 @@ class AwaitNewTweet:
         self.poll_rate = poll_rate
         self.loop = None
         self.log = logging.getLogger("AwaitNewTweet")
+        # setup logging (imported from github.com/jtara1/turbo_palm_tree)
+        logging.basicConfig(
+            filename='logger.log',
+            format='%(levelname)s | %(name)s | %(asctime)s | %(message)s',
+            datefmt='%m/%d/%y %H:%M:%S',
+            level=logging.DEBUG)
 
     def _define_new_most_recent_tweet(self):
         """ Update the JSON file and the dictionary in case this twitter_screen_name has no defined last tweet id """
@@ -83,10 +89,14 @@ class AwaitNewTweet:
         for s in statuses:
             # if classification of tweet text is in trigger_targets
             if self.clf.classify(s.text)[0] in self.trigger_targets:
-                print("Retweeting: " + get_first_x_words(s.text, 10) + " ...")
+                status_str = "Retweeting: " + get_first_x_words(s.text, 10) + " ..."
+                print(status_str)
+                self.log.debug(status_str)  # store in log
                 self.api.PostRetweet(s.id)  # retweet this tweet
             else:
-                self.log.debug("Not retweeting: id={}, {} ...".format(s.id, get_first_x_words(s.text, 10)))
+                status_str = "Not retweeting: id={}, {} ...".format(s.id, get_first_x_words(s.text, 10))
+                print(status_str)
+                self.log.debug(status_str)
 
         # update dict and json file with most recent twitter id processed
         self.most_recent_tweet_id = statuses[-1].id

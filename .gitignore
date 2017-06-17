@@ -1,4 +1,5 @@
 # GameMediaBot: git ignores
+last_ids.json
 GameMediaBot/settings-base.py  # in case user leaves personal info in base file
 GameMediaBot/settings.py
 SmiteGame_classified_data (1).json
