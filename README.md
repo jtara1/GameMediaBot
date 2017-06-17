@@ -42,7 +42,8 @@ sudo python3 manual_classification.py
 ```
 _Note:_ sudo is needed by the `keyboard` library when running on Linux.
 
-Then you'd need to update the code in `run.py` to 
+Then you'd need to update the code in `run.py` to monitor the twitter account of interest
+using the data to classified as training data for the classification algorithm.
 
 ---
 

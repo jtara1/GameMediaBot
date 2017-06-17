@@ -41,7 +41,7 @@ class AwaitNewTweet:
         if self.twitter_screen_name not in self.last_ids:
             self._define_new_most_recent_tweet()
         else:
-            self.most_recent_tweet_id = self.last_ids[twitter_screen_name]
+            self.most_recent_tweet_id = self.last_ids[self.twitter_screen_name]
 
         self.clf = classifier
         self.trigger_targets = trigger_targets
