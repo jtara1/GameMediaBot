@@ -9,5 +9,6 @@ if __name__ == "__main__":
     smite_awaiter = AwaitNewTweet(classifier=smite_classifier,
                                   trigger_targets=['fwotd', 'bonus_points'],
                                   twitter_screen_name="SmiteGame",
-                                  last_id_file="last_ids.json")
+                                  last_id_file="last_ids.json",
+				  poll_rate=60)
     smite_awaiter.await()  # blocks, waiting for new tweet, classifies/predicts it, retweets if it's in trigger_targets
