@@ -3,6 +3,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDClassifier
 from sklearn import metrics
 import json
+import os
+import pickle
+from sklearn.externals import joblib
+from sklearn.model_selection import GridSearchCV
 
 
 class TweetClassifier:
@@ -35,29 +39,43 @@ class TweetClassifier:
     def __init__(self, data_file_name="SmiteGame_classified_data.json"):
         self.clf = None  # classifier
         self.data_file_name = data_file_name  # file containing a list of dictionaries with 'text' and 'category' keys
+        self.persistant_trained_model_file = "SGD_Trained_{}.pkl".format(data_file_name.split(".json")[0])
 
-        self._load_and_fit()
+        if not os.path.isfile(self.persistant_trained_model_file):
+            self._load_and_fit()
+        else:
+            self._load(get_classifier_from_file=True)
+
+    def _load(self, get_classifier_from_file=False):
+        # list of documents (each document is a body of text)
+        self.x_raw_data = [d['text'] for d in json.load(open(self.data_file_name, 'r'))]
+        # list of classification for each document
+        self.y_raw_data = [d['category'][0] for d in json.load(open(self.data_file_name, 'r'))]
+
+        # extract y-feature (categories) names
+        v = CountVectorizer()
+        v.fit_transform(self.y_raw_data)
+        self.target_names = v.get_feature_names()
+
+        if get_classifier_from_file:
+            self.clf = joblib.load(self.persistant_trained_model_file)
 
     def _load_and_fit(self):
         """ Load data from file via JSON and pass the data through the Pipeline """
+        self._load()  # load raw data (x, y vectors and target names)
+
         # takes raw data, applies transforms on it, then trains the estimator / classifier with the data
         self.clf = Pipeline([('vect', CountVectorizer()),
                              ('tfidf', TfidfTransformer()),
                              ('clf', SGDClassifier(loss='hinge', penalty='l2',
                                                    alpha=1e-3, n_iter=5, random_state=42))])
 
-        # list of documents (each document is a body of text)
-        self.x_raw_data = [d['text'] for d in json.load(open(self.data_file_name, 'r'))]
-        # list of classification for each document
-        self.y_raw_data = [d['category'][0] for d in json.load(open(self.data_file_name, 'r'))]
         self.clf = self.clf.fit(
             self.x_raw_data,
             self.y_raw_data)
 
-        # extract y-feature (categories) names
-        v = CountVectorizer()
-        v.fit_transform(self.y_raw_data)
-        self.target_names = v.get_feature_names()
+        # save estimator to file
+        joblib.dump(self.clf._final_estimator, self.persistant_trained_model_file)
 
     def print_metrics(self):
         predicted = self.clf.predict(self.x_raw_data)

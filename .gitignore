@@ -1,6 +1,9 @@
 # GameMediaBot: git ignores
+.directory
+*.pkl
 last_ids.json
-GameMediaBot/settings-base.py  # in case user leaves personal info in base file
+# in case user leaves personal info in base file
+GameMediaBot/settings-base.py
 GameMediaBot/settings.py
 SmiteGame_classified_data (1).json
 
