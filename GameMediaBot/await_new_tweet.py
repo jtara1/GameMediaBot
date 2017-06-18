@@ -108,6 +108,6 @@ class AwaitNewTweet:
                 self.log.debug(status_str)
 
         # update dict and json file with most recent twitter id processed
-        self.most_recent_tweet_id = statuses[-1].id
+        self.most_recent_tweet_id = statuses[0].id
         self.last_ids[self.twitter_screen_name] = self.most_recent_tweet_id
         json.dump(self.last_ids, open(self.last_ids_file, 'w'))
