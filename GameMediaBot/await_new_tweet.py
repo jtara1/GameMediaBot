@@ -90,9 +90,9 @@ class AwaitNewTweet:
 
     def _process_new_tweets(self, statuses):
         """ Retweet the tweets from statuses if they're classified as a trigger tweet/target 
-            Args:
-                statuses (list of twitter.model.Status):
-                    Iterate through these, classifying each
+        Args:
+            statuses (list of twitter.model.Status):
+                Iterate through these, classifying each
         """
         # iterate from oldest to newest (tweet) statuses
         for s in sorted(statuses, key=lambda status: status.id):
