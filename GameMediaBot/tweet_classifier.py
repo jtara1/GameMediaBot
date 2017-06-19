@@ -57,6 +57,12 @@ class TweetClassifier:
         v.fit_transform(self.y_raw_data)
         self.target_names = v.get_feature_names()
 
+        # takes raw data, applies transforms on it, then trains the estimator / classifier with the data
+        self.clf = Pipeline([('vect', CountVectorizer()),
+                             ('tfidf', TfidfTransformer()),
+                             ('clf', SGDClassifier(loss='hinge', penalty='l2',
+                                                   alpha=1e-3, n_iter=5, random_state=42))])
+
         if get_classifier_from_file:
             self.clf = joblib.load(self.persistant_trained_model_file)
 
@@ -64,18 +70,12 @@ class TweetClassifier:
         """ Load data from file via JSON and pass the data through the Pipeline """
         self._load()  # load raw data (x, y vectors and target names)
 
-        # takes raw data, applies transforms on it, then trains the estimator / classifier with the data
-        self.clf = Pipeline([('vect', CountVectorizer()),
-                             ('tfidf', TfidfTransformer()),
-                             ('clf', SGDClassifier(loss='hinge', penalty='l2',
-                                                   alpha=1e-3, n_iter=5, random_state=42))])
-
         self.clf = self.clf.fit(
             self.x_raw_data,
             self.y_raw_data)
 
         # save estimator to file
-        joblib.dump(self.clf._final_estimator, self.persistant_trained_model_file)
+        joblib.dump(self.clf, self.persistant_trained_model_file)
 
     def print_metrics(self):
         predicted = self.clf.predict(self.x_raw_data)
