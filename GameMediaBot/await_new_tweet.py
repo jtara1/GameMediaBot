@@ -14,7 +14,7 @@ class AwaitNewTweet:
         a trigger tweet.
     
         Args:
-            classifier (TweetClassifier):
+            classifier (TweetClassifier):/home/j/Documents/_Github-Projects/GameMediaBot
                 An estimator that's been trained on a dataset and ready to classify a document by calling classify(doc)
                 on it
             trigger_targets (list of str):
@@ -32,7 +32,8 @@ class AwaitNewTweet:
                  trigger_targets,
                  twitter_screen_name,
                  last_id_file="last_ids.json",
-                 poll_rate=10):
+                 poll_rate=10,
+                 file_writer=None):
         self.api = twitter.Api(consumer_key=consumer_key,
                                consumer_secret=consumer_secret,
                                access_token_key=access_token_key,
@@ -62,6 +63,16 @@ class AwaitNewTweet:
             format='%(levelname)s | %(name)s | %(asctime)s | %(message)s',
             datefmt='%m/%d/%y %H:%M:%S',
             level=logging.DEBUG)
+
+        # if file_writer[0] is None:
+        #     raise ValueError("Use without file_writer is not implemented yet")
+
+        if file_writer is not None:
+            self.file_writer = file_writer[0]  # dereference
+            # only need to have dictionary containing last id for this twitter acc we're monitoring
+            self.last_ids = {self.twitter_screen_name: self.last_ids[self.twitter_screen_name]}
+        else:
+            self.file_writer = file_writer
 
     def _define_new_most_recent_tweet(self):
         """ Update the JSON file and the dictionary in case this twitter_screen_name has no defined last tweet id """
@@ -110,4 +121,7 @@ class AwaitNewTweet:
         # update dict and json file with most recent twitter id processed
         self.most_recent_tweet_id = statuses[0].id
         self.last_ids[self.twitter_screen_name] = self.most_recent_tweet_id
-        json.dump(self.last_ids, open(self.last_ids_file, 'w'))
+        if self.file_writer is None:
+            json.dump(self.last_ids, open(self.last_ids_file, 'w'))
+        else:
+            self.file_writer.write(self.last_ids)
