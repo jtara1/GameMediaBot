@@ -10,7 +10,7 @@ class FileWriter:
         self.file_path = file_name
 
         if os.path.isfile(file_name):
-            self.data_dict = json.load(open(file_name), 'r')
+            self.data_dict = json.load(open(file_name, 'r'))
         else:
             self.data_dict = {}
 
