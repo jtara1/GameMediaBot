@@ -26,9 +26,10 @@ class ManualClassification:
         self.categories = categories
 
         # begin
-        self._load_last_id()
-        self._get_statuses()
-        self._iterate_over_statuses()
+        while True:
+            self._load_last_id()
+            self._get_statuses()
+            self._iterate_over_statuses()
 
     def _load_last_id(self):
         if os.path.isfile(self.file_name):
@@ -54,14 +55,14 @@ class ManualClassification:
                           access_token_secret=access_token_secret)
 
         self.statuses = api.GetUserTimeline(screen_name=self.twitter_screen_name,
-                                            count=40,
+                                            count=200,  # 200 is max amount permitted by python-twitter
                                             max_id=self.last_id,
                                             include_rts=False,
                                             exclude_replies=True)
 
     def _iterate_over_statuses(self):
-        def classify_as(category):
-            self.classification = category
+        def classify_as(classification):
+            self.classification = classification
 
         def save():
             with open(self.file_name, "w") as f:
@@ -69,10 +70,10 @@ class ManualClassification:
             print("\nSave completed, safe to exit")
 
         if len(self.categories) > 9:
-            raise ValueError("Auto hotkey assignment might screw up")
+            raise ValueError("Auto hotkey assignment will screw up with more than 9 categories")
 
         ui_str = ""
-        for count, category in zip(range(len(self.categories)), self.categories):
+        for count, category in enumerate(self.categories):
             keyboard.add_hotkey(hotkey=str(count+1), callback=classify_as, args=([[category]]))
             ui_str += "[{count}] {category}\n".format(count=count+1, category=category)
         ui_str += "[Enter] Continue\n[Ctrl+c] Save PREVIOUS & Exit"
@@ -111,4 +112,13 @@ class ManualClassification:
 
 
 if __name__ == "__main__":
-    ManualClassification(twitter_screen_name="SmiteGame", categories=["fwotd", "bonus_points"])
+    """ The categories I've used and what they represent:
+        fwotd: First win of the day special event (often used to give free gems away in Smite)
+        bonus_points: Additional experience or currency gained event
+        f2p: Free to play event
+        game_sale: The game is being sold at a discounted price
+        promotion: In game content is being sold at a discount (or possibly free)
+    """
+    # ManualClassification(twitter_screen_name="SmiteGame", categories=["fwotd", "bonus_points"])
+    ManualClassification(twitter_screen_name="PlayOverwatch",
+                         categories=["f2p", "game_sale", "promotion", "bonus_points"])
