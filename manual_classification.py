@@ -10,12 +10,16 @@ colorama.init()
 
 
 class ManualClassification:
-    def __init__(self, twitter_screen_name, categories):
+    def __init__(self, twitter_screen_name, categories, start_from_most_recent=False):
         """
         
         Args:
             twitter_screen_name (str): 
                 Name seen when visiting the twitter profile. Tweets will be pulled from this profile 
+            categories (list of str):
+                The names of the categories you wish to classify the tweets as
+            start_from_most_recent (bool):
+                Begins iterating over the twitter timeline from the most recent tweet to the older ones if True
         """
         self.classification = []
         self.twitter_screen_name = twitter_screen_name
@@ -24,12 +28,15 @@ class ManualClassification:
         self.tweets = []
         self.statuses = None
         self.categories = categories
+        self.start_from_most_recent = start_from_most_recent
+        self.first_load = True
 
         # begin
         while True:
             self._load_last_id()
-            self._get_statuses()
+            self._get_statuses(start_from_most_recent=(self.first_load and self.start_from_most_recent))
             self._iterate_over_statuses()
+            self.first_load = False
 
     def _load_last_id(self):
         if os.path.isfile(self.file_name):
@@ -41,7 +48,7 @@ class ManualClassification:
         today = datetime.datetime.utcnow()
         return "{0}-{1}-{2}".format(today.year, today.month, today.day)
 
-    def _get_statuses(self):
+    def _get_statuses(self, start_from_most_recent=False):
         """ 
         Script requires root privilege if running on Linux because of the keyboard library
         Examples: $ sudo manual_classification.py
@@ -54,9 +61,10 @@ class ManualClassification:
                           access_token_key=access_token_key,
                           access_token_secret=access_token_secret)
 
+        max_id = None if start_from_most_recent else self.last_id  # if max_id is none, it starts from beginning
         self.statuses = api.GetUserTimeline(screen_name=self.twitter_screen_name,
                                             count=200,  # 200 is max amount permitted by python-twitter
-                                            max_id=self.last_id,
+                                            max_id=max_id,
                                             include_rts=False,
                                             exclude_replies=True)
 
@@ -99,7 +107,8 @@ class ManualClassification:
             try:
                 keyboard.wait('enter')
             except KeyboardInterrupt:
-                break
+                save()
+                exit(0)
 
             print("-" * 10)
 
@@ -119,6 +128,8 @@ if __name__ == "__main__":
         game_sale: The game is being sold at a discounted price
         promotion: In game content is being sold at a discount (or possibly free)
     """
-    # ManualClassification(twitter_screen_name="SmiteGame", categories=["fwotd", "bonus_points"])
-    ManualClassification(twitter_screen_name="PlayOverwatch",
-                         categories=["f2p", "game_sale", "promotion", "bonus_points"])
+    ManualClassification(twitter_screen_name="SmiteGame",
+                         categories=["fwotd", "bonus_points"],
+                         start_from_most_recent=True)
+    # ManualClassification(twitter_screen_name="PlayOverwatch",
+    #                      categories=["f2p", "game_sale", "promotion", "bonus_points"])

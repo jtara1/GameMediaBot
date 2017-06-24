@@ -76,7 +76,7 @@ class AwaitNewTweet:
 
     def _define_new_most_recent_tweet(self):
         """ Update the JSON file and the dictionary in case this twitter_screen_name has no defined last tweet id """
-        self.most_recent_tweet_id = self.api.GetUserTimeline(screen_name=self.twitter_screen_name, count=2)[1].id
+        self.most_recent_tweet_id = self.api.GetUserTimeline(screen_name=self.twitter_screen_name, count=10)[-1].id
         self.last_ids[self.twitter_screen_name] = self.most_recent_tweet_id
 
     def await(self):
