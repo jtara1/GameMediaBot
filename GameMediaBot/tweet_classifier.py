@@ -35,13 +35,17 @@ class TweetClassifier:
         Args:
             data_file_name (str):
                 Name of the file containing the dataset which is used to train the classifier
+            retrain (bool):
+                Train classifier from pre-classified training set instead of deserializing previous
+                trained classifier if True
     """
-    def __init__(self, data_file_name="SmiteGame_classified_data.json"):
+    def __init__(self, data_file_name="SmiteGame_classified_data.json", retrain=False):
         self.clf = None  # classifier
         self.data_file_name = data_file_name  # file containing a list of dictionaries with 'text' and 'category' keys
         self.persistant_trained_model_file = "SGD_Trained_{}.pkl".format(data_file_name.split(".json")[0])
 
-        if not os.path.isfile(self.persistant_trained_model_file):
+        # train from scratch flag enabled or no serialized classifier found
+        if retrain or not os.path.isfile(self.persistant_trained_model_file):
             self._load_and_fit()
         else:
             self._load(get_classifier_from_file=True)

@@ -2,9 +2,13 @@ from GameMediaBot.tweet_classifier import TweetClassifier
 from GameMediaBot.await_new_tweet import AwaitNewTweet
 from GameMediaBot.utility.file_writer import FileWriter
 import os
+import click
 
 
-if __name__ == "__main__":
+@click.command()
+@click.option(
+    '--retrain', default=False, is_flag=True, help="Train the classifier again instead of deserializing.")
+def main(retrain=False):
     # ManualClassification(twitter_screen_name="SmiteGame", search_keywords=["FWOTD"])
 
     last_ids_file = os.path.join(os.getcwd(), 'last_ids.json')
@@ -17,3 +21,7 @@ if __name__ == "__main__":
                                   last_id_file="last_ids.json",
                                   file_writer=file_writer)
     smite_awaiter.await()  # blocks, waiting for new tweet, classifies/predicts it, retweets if it's in trigger_targets
+
+
+if __name__ == "__main__":
+    main()
