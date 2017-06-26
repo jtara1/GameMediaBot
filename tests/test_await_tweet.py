@@ -8,20 +8,7 @@ from GameMediaBot.settings import *
 
 
 class TestAwaitTweet:
-    logging.basicConfig(level=logging.DEBUG)
-
-    # @pytest.fixture(scope="module", params=["status_id"])
-    # def on_exit(self):
-    #     yield
-    #     api = twitter.Api(consumer_key=consumer_key,
-    #                        consumer_secret=consumer_secret,
-    #                        access_token_key=access_token_key,
-    #                        access_token_secret=access_token_secret)
-    #     api.DestroyStatus(status_id=)
-
     def test(self):
-        log = logging.getLogger("test_1")
-
         api = twitter.Api(consumer_key=consumer_key,
                           consumer_secret=consumer_secret,
                           access_token_key=access_token_key,
@@ -44,7 +31,6 @@ class TestAwaitTweet:
         new_tweet_status = api.PostUpdate(status=doc1)
         api.PostUpdate(status=doc2)
 
-        log.debug("waiting before we check user timeline most recent tweet")
         time.sleep(awaiter.poll_rate + 1)
         print("checking statuses/tweets ...")
         recheck_statuses = api.GetHomeTimeline(count=2)

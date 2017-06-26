@@ -8,13 +8,18 @@ import click
 @click.command()
 @click.option(
     '--retrain', default=False, is_flag=True, help="Train the classifier again instead of deserializing.")
-def main(retrain=False):
+@click.option(
+    '--print-metrics', default=False, is_flag=True, help="""Print the accuracy of the training data classified with 
+                                                         the classifier that was trained on it.""")
+def main(retrain=False, print_metrics=False):
     # ManualClassification(twitter_screen_name="SmiteGame", search_keywords=["FWOTD"])
 
     last_ids_file = os.path.join(os.getcwd(), 'last_ids.json')
     file_writer = [FileWriter(file_name=last_ids_file)]
 
-    smite_classifier = TweetClassifier(data_file_name="SmiteGame_classified_data.json")
+    smite_classifier = TweetClassifier(data_file_name="SmiteGame_classified_data.json",
+                                       retrain=retrain,
+                                       print_metrics=print_metrics)
     smite_awaiter = AwaitNewTweet(classifier=smite_classifier,
                                   trigger_targets=['fwotd', 'bonus_points'],
                                   twitter_screen_name="SmiteGame",

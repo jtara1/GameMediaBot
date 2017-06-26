@@ -128,8 +128,8 @@ if __name__ == "__main__":
         game_sale: The game is being sold at a discounted price
         promotion: In game content is being sold at a discount (or possibly free)
     """
-    ManualClassification(twitter_screen_name="SmiteGame",
-                         categories=["fwotd", "bonus_points"],
-                         start_from_most_recent=True)
-    # ManualClassification(twitter_screen_name="PlayOverwatch",
-    #                      categories=["f2p", "game_sale", "promotion", "bonus_points"])
+    # ManualClassification(twitter_screen_name="SmiteGame",
+    #                      categories=["fwotd", "bonus_points"],
+    #                      start_from_most_recent=True)
+    ManualClassification(twitter_screen_name="PlayOverwatch",
+                         categories=["f2p", "game_sale", "promotion", "bonus_points"])

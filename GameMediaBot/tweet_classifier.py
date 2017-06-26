@@ -38,8 +38,11 @@ class TweetClassifier:
             retrain (bool):
                 Train classifier from pre-classified training set instead of deserializing previous
                 trained classifier if True
+            print_metrics (bool):
+                Prints the accuracy of the classification of the training data after the classifier is
+                trained if True
     """
-    def __init__(self, data_file_name="SmiteGame_classified_data.json", retrain=False):
+    def __init__(self, data_file_name="SmiteGame_classified_data.json", retrain=False, print_metrics=False):
         self.clf = None  # classifier
         self.data_file_name = data_file_name  # file containing a list of dictionaries with 'text' and 'category' keys
         self.persistant_trained_model_file = "SGD_Trained_{}.pkl".format(data_file_name.split(".json")[0])
@@ -49,6 +52,8 @@ class TweetClassifier:
             self._load_and_fit()
         else:
             self._load(get_classifier_from_file=True)
+        if print_metrics:
+            self.print_metrics()
 
     def _load(self, get_classifier_from_file=False):
         # list of documents (each document is a body of text)
