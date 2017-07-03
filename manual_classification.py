@@ -21,9 +21,12 @@ class ManualClassification:
             start_from_most_recent (bool):
                 Begins iterating over the twitter timeline from the most recent tweet to the older ones if True
         """
+        self.api = None
         self.classification = []
-        self.twitter_screen_name = twitter_screen_name
+        self.twitter_screen_name = twitter_screen_name.lower()
         self.file_name = "{0}_classified_data.json".format(twitter_screen_name)
+        self.last_ids_file = "last_ids.json"
+        self.last_ids_data = None
         self.last_id = None
         self.tweets = []
         self.statuses = None
@@ -31,7 +34,7 @@ class ManualClassification:
         self.start_from_most_recent = start_from_most_recent
         self.first_load = True
 
-        # begin
+        # begin. end with keyboard interrupt or console close
         while True:
             self._load_last_id()
             self._get_statuses(start_from_most_recent=(self.first_load and self.start_from_most_recent))
@@ -39,10 +42,18 @@ class ManualClassification:
             self.first_load = False
 
     def _load_last_id(self):
+        # load prev classified tweets
         if os.path.isfile(self.file_name):
             with open(self.file_name, 'r') as f:
                 self.tweets = json.load(f)
-            self.last_id = self.tweets[-1]['id']
+        # load tweet id to resume downloading at
+        if os.path.isfile(self.last_ids_file):
+            with open(self.last_ids_file, 'r') as f:
+                try:
+                    self.last_id = self.last_ids_data['manual_classification_ids'][self.twitter_screen_name]
+                    self.last_ids_data = json.load(fp=f)
+                except (KeyError, json.decoder.JSONDecodeError):
+                    pass  # the values attempted to load are initially assigned None
 
     def _get_date(self):
         today = datetime.datetime.utcnow()
@@ -56,25 +67,40 @@ class ManualClassification:
             None. Output can be a .json file containing data of tweets with 
             classification when user commands it
         """
-        api = twitter.Api(consumer_key=consumer_key,
-                          consumer_secret=consumer_secret,
-                          access_token_key=access_token_key,
-                          access_token_secret=access_token_secret)
+        self.api = twitter.Api(consumer_key=consumer_key,
+                               consumer_secret=consumer_secret,
+                               access_token_key=access_token_key,
+                               access_token_secret=access_token_secret)
 
         max_id = None if start_from_most_recent else self.last_id  # if max_id is none, it starts from beginning
-        self.statuses = api.GetUserTimeline(screen_name=self.twitter_screen_name,
-                                            count=200,  # 200 is max amount permitted by python-twitter
-                                            max_id=max_id,
-                                            include_rts=False,
-                                            exclude_replies=True)
+        self.statuses = self.api.GetUserTimeline(screen_name=self.twitter_screen_name,
+                                                 count=200,  # 200 is max amount permitted by python-twitter
+                                                 max_id=max_id,
+                                                 include_rts=False,
+                                                 exclude_replies=True)
 
     def _iterate_over_statuses(self):
         def classify_as(classification):
             self.classification = classification
 
         def save():
+            # save tweets
             with open(self.file_name, "w") as f:
                 json.dump(self.tweets, f)
+            # save tweet id to resume at next time
+            with open(self.last_ids_file, 'w') as f:
+                next_id = self.api.GetUserTimeline(screen_name=self.twitter_screen_name,
+                                                   count=1,  # 200 is max amount permitted by python-twitter
+                                                   max_id=self.tweets[-1]['id'],
+                                                   include_rts=False,
+                                                   exclude_replies=True)
+                next_id = next_id[0]
+                if 'manual_classification_ids' in self.last_ids_data:
+                    self.last_ids_data['manual_classification_ids'][self.twitter_screen_name] = next_id
+                else:
+                    self.last_ids_data['manual_classification_ids'] = {self.twitter_screen_name: next_id}
+
+                json.dump(fp=f, obj=self.last_ids_file)
             print("\nSave completed, safe to exit")
 
         if len(self.categories) > 9:
