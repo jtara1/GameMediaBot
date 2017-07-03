@@ -50,8 +50,11 @@ class ManualClassification:
         if os.path.isfile(self.last_ids_file):
             with open(self.last_ids_file, 'r') as f:
                 try:
-                    self.last_id = self.last_ids_data['manual_classification_ids'][self.twitter_screen_name]
                     self.last_ids_data = json.load(fp=f)
+                    if not self.last_ids_data == '':
+                        self.last_id = self.last_ids_data['manual_classification_ids'][self.twitter_screen_name]
+                    else:
+                        self.last_ids_file = None
                 except (KeyError, json.decoder.JSONDecodeError):
                     pass  # the values attempted to load are initially assigned None
 
@@ -94,13 +97,16 @@ class ManualClassification:
                                                    max_id=self.tweets[-1]['id'],
                                                    include_rts=False,
                                                    exclude_replies=True)
-                next_id = next_id[0]
-                if 'manual_classification_ids' in self.last_ids_data:
-                    self.last_ids_data['manual_classification_ids'][self.twitter_screen_name] = next_id
+                next_id = next_id[0].id
+                if self.last_ids_data:
+                    if 'manual_classification_ids' in self.last_ids_data:
+                        self.last_ids_data['manual_classification_ids'][self.twitter_screen_name] = next_id
+                    else:
+                        self.last_ids_data['manual_classification_ids'] = {self.twitter_screen_name: next_id}
                 else:
-                    self.last_ids_data['manual_classification_ids'] = {self.twitter_screen_name: next_id}
+                    self.last_ids_data = {'manual_classification_ids': {self.twitter_screen_name: next_id}}
 
-                json.dump(fp=f, obj=self.last_ids_file)
+                json.dump(fp=f, obj=self.last_ids_data)
             print("\nSave completed, safe to exit")
 
         if len(self.categories) > 9:
