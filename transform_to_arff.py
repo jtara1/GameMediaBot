@@ -29,11 +29,9 @@ def transform(file, dont_care_category, a):
     :return:
     """
     classes = set()
-    file = 'SmiteGame_classified_data.json'
     data = json.load(open(file, 'r'))
 
     master_vector = Counter()
-    dont_care_category = 'dont_care'
 
     for tweet in data:
         classes.add(tweet['category'][0])
