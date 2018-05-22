@@ -28,6 +28,7 @@ def transform(file, dont_care_category, a):
 
     :return:
     """
+    classes = set()
     file = 'SmiteGame_classified_data.json'
     data = json.load(open(file, 'r'))
 
@@ -35,6 +36,7 @@ def transform(file, dont_care_category, a):
     dont_care_category = 'dont_care'
 
     for tweet in data:
+        classes.add(tweet['category'][0])
         if tweet['category'][0] != dont_care_category:
             master_vector += get_word_vector(tweet)
 
@@ -42,6 +44,7 @@ def transform(file, dont_care_category, a):
 
     # most common words in the text of the target category
     attrs = [(word, 'INTEGER') for word, _ in master_vector.most_common(a)]
+    attrs.append(('class', [value for value in classes]))
 
     arff_data = {
         'attributes': attrs,
@@ -52,7 +55,8 @@ def transform(file, dont_care_category, a):
 
     for tweet in data:
         word_vector = get_word_vector(tweet)
-        tweet_data = [word_vector[attr[0]] for attr in attrs]
+        tweet_data = [word_vector[attr[0]] for attr in attrs[:-1]]
+        tweet_data.append(tweet['category'][0])
         arff_data['data'].append(tweet_data)
 
     out_file = file.replace('.json', '.arff')
