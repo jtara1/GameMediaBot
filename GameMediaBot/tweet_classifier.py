@@ -2,6 +2,8 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDClassifier
 from sklearn import metrics
+from sklearn.model_selection import StratifiedKFold
+from sklearn import preprocessing
 import json
 import os
 import pickle
@@ -67,16 +69,21 @@ class TweetClassifier:
         self.target_names = v.get_feature_names()
 
         # takes raw data, applies transforms on it, then trains the estimator / classifier with the data
-        self.clf = Pipeline([('vect', CountVectorizer()),
-                             ('tfidf', TfidfTransformer()),
-                             ('clf', SGDClassifier(loss='hinge', penalty='l2',
-                                                   alpha=1e-3, n_iter=5, random_state=42))])
+        self.clf = Pipeline(
+            [
+                ('vect', CountVectorizer()),
+                ('tfidf', TfidfTransformer()),
+                ('clf', SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3,
+                                      n_iter=5, random_state=42)),
+            ]
+        )
 
         if get_classifier_from_file:
             self.clf = joblib.load(self.persistant_trained_model_file)
 
     def _load_and_fit(self):
-        """ Load data from file via JSON and pass the data through the Pipeline """
+        """ Load data from file via JSON and pass the data
+        through the Pipeline """
         self._load()  # load raw data (x, y vectors and target names)
 
         self.clf = self.clf.fit(
@@ -101,6 +108,7 @@ class TweetClassifier:
         if not isinstance(document, list):
             document = [document]
         return self.clf.predict(document)
+
 
 if __name__ == "__main__":
     pass

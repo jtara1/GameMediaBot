@@ -18,7 +18,16 @@ import click
               default=40,
               help='Number of attributes. Attrs are the most frequent words '
                    'in the text of the target category')
-def transform(file, dont_care_category, a):
+@click.option('--attributes-file',
+              type=click.STRING,
+              default='',
+              help='ARFF file containing the attributes that are to be shared'
+                   'between various ARFF files and their data')
+def transform_cli_wrapped(file, dont_care_category, a, attributes_file):
+    transform(file, dont_care_category, a, attributes_file)
+
+
+def transform(file, dont_care_category, a, attributes_file):
     """input example
     [ {id: 123, text: "this is text body", category: ["dont_care"]} ]
     output example
@@ -40,9 +49,15 @@ def transform(file, dont_care_category, a):
 
     print(master_vector)
 
-    # most common words in the text of the target category
-    attrs = [(word, 'INTEGER') for word, _ in master_vector.most_common(a)]
-    attrs.append(('class', [value for value in classes]))
+    attrs = None
+    if not attributes_file:
+        # most common words in the text of the target category
+        attrs = [(word, 'INTEGER') for word, _ in master_vector.most_common(a)]
+        attrs.append(('class', [value for value in classes]))
+    else:
+        # load attributes from this file
+        arff_data = arff.load(open(attributes_file, 'r'))
+        attrs = arff_data['attributes']
 
     arff_data = {
         'attributes': attrs,
@@ -62,14 +77,17 @@ def transform(file, dont_care_category, a):
     with open(out_file, 'w') as f:
         f.write(data)
 
+    return out_file
+
 
 def get_word_vector(tweet):
     stop_words = stopwords.words('english')
     stop_words += ['!', ':', ',', '-', 'https', '/', '\u2026', "'s", "n't",
                    '#', '.', ';', ')', '(', "'re", '&', '?', '%', '@', "'",
-                   '...']
+                   '...', 'http']
 
     uri = re.compile(r'(https)?:?//t\.co/.*')
+    has_ellipsis = re.compile(r'.*\u2026.*')
 
     # remove whitespace characters and put each word in a list
     words = word_tokenize(tweet['text'])
@@ -79,7 +97,7 @@ def get_word_vector(tweet):
 
     words = list(
         filter(
-            lambda word: word not in stop_words and not uri.match(word),
+            lambda word: word not in stop_words and not uri.match(word) and not has_ellipsis.match(word),
             words
         )
     )
@@ -88,4 +106,4 @@ def get_word_vector(tweet):
 
 
 if __name__ == '__main__':
-    transform()
+    transform_cli_wrapped()
