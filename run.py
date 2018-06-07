@@ -1,4 +1,5 @@
 from GameMediaBot.tweet_classifier import TweetClassifier
+from GameMediaBot.tweet_classifier2 import TweetClassifier2
 from GameMediaBot.await_new_tweet import AwaitNewTweet
 from GameMediaBot.utility.file_writer import FileWriter
 import os
@@ -20,7 +21,8 @@ def main(retrain=False, print_metrics=False):
     smite_classifier = TweetClassifier(data_file_name="SmiteGame_classified_data.json",
                                        retrain=retrain,
                                        print_metrics=print_metrics)
-    smite_awaiter = AwaitNewTweet(classifier=smite_classifier,
+    smite_classifier2 = TweetClassifier2('SmiteGame')
+    smite_awaiter = AwaitNewTweet(classifier=smite_classifier2,
                                   trigger_targets=['fwotd', 'bonus_points'],
                                   twitter_screen_name="SmiteGame",
                                   last_id_file="last_ids.json",
