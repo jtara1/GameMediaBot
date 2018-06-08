@@ -3,7 +3,7 @@ import json
 from os.path import join, dirname, abspath, basename
 from collections import Counter, OrderedDict
 from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
+from nltk.corpus import stopwords	
 import arff
 import click
 

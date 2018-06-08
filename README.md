@@ -18,9 +18,13 @@ Program tested on Linux with Python 3.5
 
 ## Install
 
-```
+```bash
 git clone https://github.com/jtara1/GameMediaBot
 sudo pip3.5 install -r requirements.txt
+
+python3 -c "import nltk;
+	nltk.download('stopwords');
+	nltk.download('punkt')"
 ```
 
 - You'll also need to go to [apps twitter site](https://apps.twitter.com/) to create an app to get the four things
