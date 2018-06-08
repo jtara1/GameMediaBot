@@ -6,4 +6,5 @@ numpy
 scipy
 click
 liac-arff
-python3-weka-wrapper3
+python-weka-wrapper3
+nltk
