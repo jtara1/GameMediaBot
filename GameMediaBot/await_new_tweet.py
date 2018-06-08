@@ -6,6 +6,7 @@ import os
 import colorama
 from GameMediaBot.settings import *
 from GameMediaBot.utility.general import get_first_x_words
+from GameMediaBot.emailer import Emailer
 colorama.init()
 
 
@@ -32,8 +33,11 @@ class AwaitNewTweet:
                  trigger_targets,
                  twitter_screen_name,
                  last_id_file="last_ids.json",
-                 poll_rate=10,
-                 file_writer=None):
+                 poll_rate=121,
+                 file_writer=None,
+                 email='',
+                 gmail_oauth2_file='',
+                 email_csv=''):
         self.api = twitter.Api(consumer_key=consumer_key,
                                consumer_secret=consumer_secret,
                                access_token_key=access_token_key,
@@ -64,15 +68,14 @@ class AwaitNewTweet:
             datefmt='%m/%d/%y %H:%M:%S',
             level=logging.DEBUG)
 
-        # if file_writer[0] is None:
-        #     raise ValueError("Use without file_writer is not implemented yet")
-
         if file_writer is not None:
             self.file_writer = file_writer[0]  # dereference
             # only need to have dictionary containing last id for this twitter acc we're monitoring
             self.last_ids = {self.twitter_screen_name: self.last_ids[self.twitter_screen_name]}
         else:
             self.file_writer = file_writer
+
+        self.emailer = Emailer(email, gmail_oauth2_file, email_csv)
 
     def _define_new_most_recent_tweet(self):
         """ Update the JSON file and the dictionary in case this twitter_screen_name has no defined last tweet id """
@@ -108,15 +111,10 @@ class AwaitNewTweet:
         # iterate from oldest to newest (tweet) statuses
         for s in sorted(statuses, key=lambda status: status.id):
             # if classification of tweet text is in trigger_targets
-            if self.clf.classify(s.text)[0] in self.trigger_targets:
-                status_str = "Retweeting: " + get_first_x_words(s.text, 10) + " ..."
-                print(colorama.Fore.GREEN + status_str + colorama.Style.RESET_ALL)
-                self.log.debug(status_str)  # store in log
-                self.api.PostRetweet(s.id)  # retweet this tweet
+            if self.clf.classify(s.text) in self.trigger_targets:
+                self._trigger_tweet_found(s)
             else:
-                status_str = "Not retweeting: id={}, {} ...".format(s.id, get_first_x_words(s.text, 10))
-                print(colorama.Fore.RED + status_str + colorama.Style.RESET_ALL)
-                self.log.debug(status_str)
+                self._trigger_tweet_not_found(s)
 
         # update dict and json file with most recent twitter id processed
         self.most_recent_tweet_id = statuses[0].id
@@ -125,3 +123,29 @@ class AwaitNewTweet:
             json.dump(self.last_ids, open(self.last_ids_file, 'w'))
         else:
             self.file_writer.write(self.last_ids)
+
+    def _trigger_tweet_found(self, tweet):
+        status_str = "Retweeting: " + get_first_x_words(tweet.text, 10) + " ..."
+        print(colorama.Fore.GREEN + status_str + colorama.Style.RESET_ALL)
+        self.log.debug(status_str)  # store in log
+        self.api.PostRetweet(tweet.id)  # retweet this tweet
+        self.emailer.send_to_all(
+            '{}: New Event!'.format(self.twitter_screen_name),
+            """<html>
+            <body>
+            <a href="{tweet_link}" />
+            <p>{tweet_text}</p>
+            </body>
+            </html>
+            """.format(
+                tweet_link='https://www.twitter.com/{}/status/{}'
+                    .format(self.twitter_screen_name, tweet.id),
+                tweet_text=tweet.text
+            )
+        )
+
+    def _trigger_tweet_not_found(self, tweet):
+        status_str = "Not retweeting: id={}, {} ..."\
+            .format(tweet.id, get_first_x_words(tweet.text, 10))
+        print(colorama.Fore.RED + status_str + colorama.Style.RESET_ALL)
+        self.log.debug(status_str)

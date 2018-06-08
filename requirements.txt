@@ -7,3 +7,4 @@ scipy
 click
 liac-arff
 python3-weka-wrapper3
+yagmail
