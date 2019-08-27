@@ -2,11 +2,9 @@ import os
 
 import click
 
-from GameMediaBot.tweet_classifier import TweetClassifier
 from GameMediaBot.tweet_classifier2 import TweetClassifier2
 from GameMediaBot.await_new_tweet import AwaitNewTweet
 from GameMediaBot.utility.file_writer import FileWriter
-from GameMediaBot.settings import *
 
 
 @click.command()
