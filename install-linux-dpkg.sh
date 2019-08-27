@@ -5,3 +5,5 @@ sudo apt-get install python3-pil python3-matplotlib python3-pygraphviz -y
 sudo apt-get install default-jdk
 
 pip3 install --user -r requirements.txt
+python3 -c 'import nltk; nltk.download("stopwords"); nltk.download("punkt")'
+
