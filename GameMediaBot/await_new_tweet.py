@@ -4,9 +4,10 @@ import json
 import logging
 import os
 import colorama
+
 from GameMediaBot.settings import *
 from GameMediaBot.utility.general import get_first_x_words
-from GameMediaBot.emailer import Emailer
+
 colorama.init()
 
 
@@ -34,10 +35,7 @@ class AwaitNewTweet:
                  twitter_screen_name,
                  last_id_file="last_ids.json",
                  poll_rate=121,
-                 file_writer=None,
-                 email='',
-                 gmail_oauth2_file='',
-                 email_csv=''):
+                 file_writer=None):
         self.api = twitter.Api(consumer_key=consumer_key,
                                consumer_secret=consumer_secret,
                                access_token_key=access_token_key,
@@ -74,8 +72,6 @@ class AwaitNewTweet:
             self.last_ids = {self.twitter_screen_name: self.last_ids[self.twitter_screen_name]}
         else:
             self.file_writer = file_writer
-
-        self.emailer = Emailer(email, gmail_oauth2_file, email_csv)
 
     def _define_new_most_recent_tweet(self):
         """ Update the JSON file and the dictionary in case this twitter_screen_name has no defined last tweet id """
@@ -129,20 +125,6 @@ class AwaitNewTweet:
         print(colorama.Fore.GREEN + status_str + colorama.Style.RESET_ALL)
         self.log.debug(status_str)  # store in log
         self.api.PostRetweet(tweet.id)  # retweet this tweet
-        self.emailer.send_to_all(
-            '{}: New Event!'.format(self.twitter_screen_name),
-            """<html>
-            <body>
-            <a href="{tweet_link}" />
-            <p>{tweet_text}</p>
-            </body>
-            </html>
-            """.format(
-                tweet_link='https://www.twitter.com/{}/status/{}'
-                    .format(self.twitter_screen_name, tweet.id),
-                tweet_text=tweet.text
-            )
-        )
 
     def _trigger_tweet_not_found(self, tweet):
         status_str = "Not retweeting: id={}, {} ..."\

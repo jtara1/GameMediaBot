@@ -1,10 +1,12 @@
+import os
+
+import click
+
 from GameMediaBot.tweet_classifier import TweetClassifier
 from GameMediaBot.tweet_classifier2 import TweetClassifier2
 from GameMediaBot.await_new_tweet import AwaitNewTweet
 from GameMediaBot.utility.file_writer import FileWriter
 from GameMediaBot.settings import *
-import os
-import click
 
 
 @click.command()
@@ -24,10 +26,7 @@ def main(retrain=False, print_metrics=False):
                                   trigger_targets=['fwotd', 'bonus_points'],
                                   twitter_screen_name="SmiteGame",
                                   last_id_file="last_ids.json",
-                                  file_writer=file_writer,
-                                  email=email,
-                                  email_csv=email_csv,
-                                  gmail_oauth2_file=gmail_oauth2_file)
+                                  file_writer=file_writer)
     smite_awaiter.await()  # blocks, waiting for new tweet, classifies/predicts it, retweets if it's in trigger_targets
 
 
